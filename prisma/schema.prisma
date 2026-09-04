@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BloodGroup {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  AB_POS
+  AB_NEG
+  O_POS
+  O_NEG
+  UNKNOWN
+}
+
+model Doctor {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  phone         String?
+  clinicName    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  patients      Patient[]
+  consultations Consultation[]
+  auditLogs     AuditLog[]
+  aiSummaries   AiSummary[]
+  sessions      Session[]
+}
+
+model Patient {
+  id                  String   @id @default(uuid())
+  patientCode         String   @unique
+  doctorId            String
+  fullName            String
+  dateOfBirth         DateTime?
+  age                 Int?
+  gender              Gender
+  phone               String?
+  address             String?
+  emergencyContact    String?
+  bloodGroup          BloodGroup?
+  knownAllergies      String?
+  existingConditions  String?
+  preferredLanguage   String   @default("en")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  doctor              Doctor                    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  consultations       Consultation[]
+  medications         Medication[]
+  allergies           Allergy[]
+  investigations      Investigation[]
+  medicalConditions   PatientMedicalCondition[]
+  auditLogs           AuditLog[]
+  aiSummaries         AiSummary[]
+
+  @@index([doctorId])
+  @@index([patientCode])
+  @@index([fullName])
+}
+
+model Consultation {
+  id                   String   @id @default(uuid())
+  patientId            String
+  doctorId             String
+  chiefComplaint       String
+  chiefComplaintLang   String   @default("en")
+  symptoms             String?
+  duration             String?
+  severity             String?
+  medicalHistory       String?
+  previousDiagnosis    String?
+  currentMedications   String?
+  allergies            String?
+  previousTreatment    String?
+  investigations       String?
+  doctorObservations   String?
+  assessment           String?
+  followUpNotes        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  patient   Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor    Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([createdAt])
+}
+
+model Medication {
+  id             String   @id @default(uuid())
+  patientId      String
+  name           String
+  dosage         String?
+  frequency      String?
+  startDate      DateTime?
+  endDate        DateTime?
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model Allergy {
+  id          String   @id @default(uuid())
+  patientId   String
+  name        String
+  severity    String?
+  reaction    String?
+  createdAt   DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model Investigation {
+  id           String   @id @default(uuid())
+  patientId    String
+  type         String
+  result       String?
+  notes        String?
+  conductedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model PatientMedicalCondition {
+  id          String   @id @default(uuid())
+  patientId   String
+  name        String
+  diagnosedAt DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model AiSummary {
+  id          String   @id @default(uuid())
+  patientId   String
+  doctorId    String
+  content     Json
+  language    String   @default("en")
+  createdAt   DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  doctorId  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  doctorId    String?
+  patientId   String?
+  action      String
+  details     String?
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id], onDelete: SetNull)
+  patient     Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([doctorId])
+  @@index([patientId])
+}

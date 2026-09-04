@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: doctorproject-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: doctor
+      POSTGRES_PASSWORD: doctorpass
+      POSTGRES_DB: doctor
+    ports:
+      - "5433:5432"
+    volumes:
+      - doctorproject_pgdata:/var/lib/postgresql/data
+
+volumes:
+  doctorproject_pgdata:

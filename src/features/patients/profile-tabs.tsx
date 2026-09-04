@@ -1,0 +1,383 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useLocale } from "@/components/providers/locale-provider";
+import { AISummary } from "./ai-summary";
+
+export interface PatientProfileData {
+  id: string;
+  fullName: string;
+  patientCode: string;
+  age: number | null;
+  gender: string;
+  dateOfBirth: string | null;
+  phone: string | null;
+  address: string | null;
+  emergencyContact: string | null;
+  bloodGroup: string | null;
+  knownAllergies: string | null;
+  existingConditions: string | null;
+  lastVisit: string | null;
+  consultationCount: number;
+}
+
+export interface Med {
+  id: string;
+  name: string;
+  dosage: string | null;
+  frequency: string | null;
+}
+export interface Allg {
+  id: string;
+  name: string;
+  severity: string | null;
+}
+export interface Invest {
+  id: string;
+  type: string;
+  result: string | null;
+}
+export interface Cond {
+  id: string;
+  name: string;
+  notes: string | null;
+}
+export interface ConsultationRow {
+  id: string;
+  createdAt: string;
+  chiefComplaint: string;
+  symptoms: string | null;
+  duration: string | null;
+  severity: string | null;
+  medicalHistory: string | null;
+  previousDiagnosis: string | null;
+  currentMedications: string | null;
+  allergies: string | null;
+  previousTreatment: string | null;
+  investigations: string | null;
+  doctorObservations: string | null;
+  assessment: string | null;
+  followUpNotes: string | null;
+}
+
+type TabKey = "overview" | "history" | "consultations" | "medications" | "allergies" | "investigations" | "ai";
+
+export function ProfileTabs({
+  patient,
+  consultations,
+  medications,
+  allergies,
+  investigations,
+  conditions
+}: {
+  patient: PatientProfileData;
+  consultations: ConsultationRow[];
+  medications: Med[];
+  allergies: Allg[];
+  investigations: Invest[];
+  conditions: Cond[];
+}) {
+  const [tab, setTab] = useState<TabKey>("overview");
+  const { t } = useLocale();
+
+  const tabs: Array<{ key: TabKey; label: string }> = [
+    { key: "overview", label: t("patient.profile.overview") },
+    { key: "history", label: t("patient.profile.medicalHistory") },
+    { key: "consultations", label: t("patient.profile.consultations") },
+    { key: "medications", label: t("patient.profile.medications") },
+    { key: "allergies", label: t("patient.profile.allergies") },
+    { key: "investigations", label: t("patient.profile.investigations") },
+    { key: "ai", label: t("patient.profile.aiSummary") }
+  ];
+
+  return (
+    <div>
+      <div className="border-b border-border mb-6 overflow-x-auto">
+        <div className="flex gap-1 min-w-max">
+          {tabs.map((tabItem) => (
+            <button
+              key={tabItem.key}
+              onClick={() => setTab(tabItem.key)}
+              className={`px-3 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
+                tab === tabItem.key
+                  ? "border-blue-600 text-blue-700"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+              type="button"
+            >
+              {tabItem.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <Link href={`/patients/${patient.id}/consultations/new`} className="btn-primary">
+          + {t("patient.profile.newConsultation")}
+        </Link>
+      </div>
+
+      {tab === "overview" && <Overview patient={patient} t={t} />}
+      {tab === "history" && (
+        <History
+          conditions={conditions}
+          knownAllergies={patient.knownAllergies}
+          existingConditions={patient.existingConditions}
+          medications={medications}
+          allergies={allergies}
+          investigations={investigations}
+          t={t}
+        />
+      )}
+      {tab === "consultations" && <ConsultationsTab consultations={consultations} t={t} />}
+      {tab === "medications" && <Medications medications={medications} t={t} />}
+      {tab === "allergies" && <AllergiesTab allergies={allergies} t={t} />}
+      {tab === "investigations" && <InvestigationsTab investigations={investigations} t={t} />}
+      {tab === "ai" && <AISummary patientId={patient.id} />}
+    </div>
+  );
+}
+
+function Overview({ patient, t }: { patient: PatientProfileData; t: (k: string) => string }) {
+  const rows: Array<{ label: string; value: string }> = [
+    {
+      label: t("patient.profile.age"),
+      value: patient.age != null ? `${patient.age} years` : t("patient.profile.notAvailable")
+    },
+    { label: t("patient.profile.gender"), value: patient.gender.toLowerCase() },
+    { label: t("patient.profile.phone"), value: patient.phone || t("patient.profile.notAvailable") },
+    { label: t("patient.profile.address"), value: patient.address || t("patient.profile.notAvailable") },
+    {
+      label: t("patient.profile.emergencyContact"),
+      value: patient.emergencyContact || t("patient.profile.notAvailable")
+    },
+    {
+      label: t("patient.profile.bloodGroup"),
+      value: patient.bloodGroup ? formatBloodGroup(patient.bloodGroup) : t("patient.profile.notAvailable")
+    },
+    {
+      label: t("patient.profile.knownAllergies"),
+      value: patient.knownAllergies || t("patient.profile.notAvailable")
+    },
+    {
+      label: t("patient.profile.existingConditions"),
+      value: patient.existingConditions || t("patient.profile.notAvailable")
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {rows.map((r) => (
+        <div key={r.label} className="card card-body">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {r.label}
+          </div>
+          <div className="text-sm mt-1 font-medium">{r.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function History({
+  conditions,
+  knownAllergies,
+  existingConditions,
+  medications,
+  allergies,
+  investigations,
+  t
+}: {
+  conditions: Cond[];
+  knownAllergies: string | null;
+  existingConditions: string | null;
+  medications: Med[];
+  allergies: Allg[];
+  investigations: Invest[];
+  t: (k: string) => string;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="card card-body">
+        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          {t("patient.profile.conditions")}
+        </h4>
+        {conditions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("patient.profile.notAvailable")}</p>
+        ) : (
+          <ul className="space-y-1 text-sm">
+            {conditions.map((c) => (
+              <li key={c.id} className="flex items-center gap-2">
+                <span className="text-blue-600">•</span>
+                {c.name}
+                {c.notes && <span className="text-muted-foreground">— {c.notes}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {existingConditions && (
+        <div className="card card-body">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t("patient.profile.existingConditions")}
+          </h4>
+          <p className="text-sm whitespace-pre-wrap">{existingConditions}</p>
+        </div>
+      )}
+
+      {knownAllergies && (
+        <div className="card card-body">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t("patient.profile.knownAllergies")}
+          </h4>
+          <p className="text-sm whitespace-pre-wrap">{knownAllergies}</p>
+        </div>
+      )}
+
+      {medications.length > 0 && (
+        <div className="card card-body">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t("patient.profile.medications")}
+          </h4>
+          <p className="text-sm">{medications.map((m) => m.name).join(", ")}</p>
+        </div>
+      )}
+
+      {allergies.length > 0 && (
+        <div className="card card-body">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t("patient.profile.allergies")}
+          </h4>
+          <p className="text-sm">{allergies.map((a) => a.name).join(", ")}</p>
+        </div>
+      )}
+
+      {investigations.length > 0 && (
+        <div className="card card-body">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            {t("patient.profile.investigations")}
+          </h4>
+          <p className="text-sm">
+            {investigations.map((i) => (i.result ? `${i.type}: ${i.result}` : i.type)).join(", ")}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ConsultationsTab({ consultations, t }: { consultations: ConsultationRow[]; t: (k: string) => string }) {
+  const sorted = [...consultations].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+  if (sorted.length === 0) {
+    return (
+      <div className="rounded-md bg-muted border px-4 py-6 text-center text-sm text-muted-foreground">
+        {t("patient.profile.noConsultations")}
+      </div>
+    );
+  }
+  return (
+    <ol className="relative border-l border-border ml-3 space-y-8">
+      {sorted.map((c) => (
+        <li key={c.id} className="ml-6">
+          <span className="absolute -left-1.5 mt-1.5 w-3 h-3 rounded-full bg-blue-600 ring-4 ring-white" />
+          <div className="mb-1 text-sm font-semibold text-blue-700">{formatDate(c.createdAt)}</div>
+          <div className="card card-body">
+            <div className="text-sm font-medium whitespace-pre-wrap">{c.chiefComplaint}</div>
+            {c.symptoms && (
+              <div className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
+                <span className="font-medium">Symptoms: </span>
+                {c.symptoms}
+              </div>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Medications({ medications, t }: { medications: Med[]; t: (k: string) => string }) {
+  if (medications.length === 0)
+    return <Empty message={t("patient.profile.noMedications")} />;
+  return (
+    <ul className="divide-y divide-border border rounded-md bg-white">
+      {medications.map((m) => (
+        <li key={m.id} className="p-4 text-sm">
+          <span className="font-medium">{m.name}</span>
+          {m.dosage && <span className="text-muted-foreground"> · {m.dosage}</span>}
+          {m.frequency && <span className="text-muted-foreground"> · {m.frequency}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function AllergiesTab({ allergies, t }: { allergies: Allg[]; t: (k: string) => string }) {
+  if (allergies.length === 0) return <Empty message={t("patient.profile.noAllergies")} />;
+  return (
+    <ul className="divide-y divide-border border rounded-md bg-white">
+      {allergies.map((a) => (
+        <li key={a.id} className="p-4 text-sm flex items-center gap-2">
+          <span className="font-medium">{a.name}</span>
+          {a.severity && (
+            <span className="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+              {a.severity}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function InvestigationsTab({ investigations, t }: { investigations: Invest[]; t: (k: string) => string }) {
+  if (investigations.length === 0)
+    return <Empty message={t("patient.profile.noInvestigations")} />;
+  return (
+    <ul className="divide-y divide-border border rounded-md bg-white">
+      {investigations.map((i) => (
+        <li key={i.id} className="p-4 text-sm">
+          <span className="font-medium">{i.type}</span>
+          {i.result && <span className="text-muted-foreground">: {i.result}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Empty({ message }: { message: string }) {
+  return (
+    <div className="rounded-md bg-muted border px-4 py-6 text-center text-sm text-muted-foreground">
+      {message}
+    </div>
+  );
+}
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleString("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function formatBloodGroup(value: string): string {
+  const map: Record<string, string> = {
+    A_POS: "A+",
+    A_NEG: "A-",
+    B_POS: "B+",
+    B_NEG: "B-",
+    AB_POS: "AB+",
+    AB_NEG: "AB-",
+    O_POS: "O+",
+    O_NEG: "O-",
+    UNKNOWN: "Unknown"
+  };
+  return map[value] ?? value;
+}
