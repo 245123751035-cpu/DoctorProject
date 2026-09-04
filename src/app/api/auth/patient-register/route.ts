@@ -15,7 +15,7 @@ const patientRegisterSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
     const parsed = patientRegisterSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
