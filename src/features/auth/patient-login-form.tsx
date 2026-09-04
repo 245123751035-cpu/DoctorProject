@@ -6,6 +6,13 @@ import Link from "next/link";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
 import { LanguageSelector } from "@/components/language-selector";
+import { DemoLogin, type DemoAccount } from "@/components/demo-login";
+
+const PATIENT_DEMO: DemoAccount[] = [
+  { label: "Ravi Kumar", email: "ravi.demo@example.com", password: "Patient@123" },
+  { label: "Ananya Verma", email: "ananya.demo@example.com", password: "Patient@123" },
+  { label: "Mohammed Irfan", email: "mohammed.demo@example.com", password: "Patient@123" }
+];
 
 export function PatientLoginForm() {
   const router = useRouter();
@@ -15,15 +22,14 @@ export function PatientLoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function doLogin(loginEmail: string, loginPassword: string) {
     if (loading) return;
     setLoading(true);
     try {
       const res = await fetch("/api/auth/patient-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -37,6 +43,11 @@ export function PatientLoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    doLogin(email, password);
   }
 
   return (
@@ -93,6 +104,8 @@ export function PatientLoginForm() {
           </button>
         </form>
       </div>
+
+      <DemoLogin accounts={PATIENT_DEMO} onLogin={doLogin} />
 
       <p className="mt-4 text-sm text-muted-foreground">
         {t("auth.patient.login.noAccount")}{" "}

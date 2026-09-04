@@ -25,7 +25,9 @@ const te: Record<string, unknown> = {
       error: "తప్పు ఇమెయిల్ లేదా పాస్వర్డ్.",
       genericError: "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
       asDoctor: "డాక్టర్ లాగిన్",
-      asPatient: "రోగి లాగిన్"
+      asPatient: "రోగి లాగిన్",
+      demoTitle: "డెమో లాగిన్",
+      demoHint: "నమూనా ఖాతాతో ఒక క్లిక్లో సైన్ ఇన్ చేయండి"
     },
     register: {
       title: "డాక్టర్ నమోదు",

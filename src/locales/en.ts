@@ -25,7 +25,9 @@ const en = {
       error: "Incorrect email or password.",
       genericError: "Something went wrong. Please try again.",
       asDoctor: "Doctor Login",
-      asPatient: "Patient Login"
+      asPatient: "Patient Login",
+      demoTitle: "Demo login",
+      demoHint: "One-click sign-in with a sample account"
     },
     register: {
       title: "Register Doctor",

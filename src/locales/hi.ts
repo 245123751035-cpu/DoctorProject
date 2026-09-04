@@ -25,7 +25,9 @@ const hi: Record<string, unknown> = {
       error: "गलत ईमेल या पासवर्ड।",
       genericError: "कुछ गड़बड़ हो गई। कृपया पुनः प्रयास करें।",
       asDoctor: "डॉक्टर लॉगिन",
-      asPatient: "रोगी लॉगिन"
+      asPatient: "रोगी लॉगिन",
+      demoTitle: "डेमो लॉगिन",
+      demoHint: "नमूना खाते के साथ एक क्लिक में साइन इन करें"
     },
     register: {
       title: "डॉक्टर पंजीकरण",

@@ -6,6 +6,11 @@ import Link from "next/link";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
 import { LanguageSelector } from "@/components/language-selector";
+import { DemoLogin, type DemoAccount } from "@/components/demo-login";
+
+const DOCTOR_DEMO: DemoAccount[] = [
+  { label: "Demo Doctor", email: "demo@doctordemo.com", password: "Doctor@123" }
+];
 
 export function LoginForm({ role }: { role?: "doctor" } = {}) {
   const router = useRouter();
@@ -15,15 +20,14 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function doLogin(loginEmail: string, loginPassword: string) {
     if (loading) return;
     setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -37,6 +41,11 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    doLogin(email, password);
   }
 
   return (
@@ -102,6 +111,8 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
           </button>
         </form>
       </div>
+
+      <DemoLogin accounts={DOCTOR_DEMO} onLogin={doLogin} />
 
       <p className="mt-4 text-sm text-muted-foreground">
         {t("auth.login.noAccount")}{" "}
