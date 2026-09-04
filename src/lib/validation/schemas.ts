@@ -27,7 +27,7 @@ export const patientCodeSchema = z.string().refine(
 
 export const patientRegisterSchema = z.object({
   fullName: z.string().min(2, "Full name is required").max(150),
-  dateOfBirth: z.string().optional().or(z.literal("")),
+  dateOfBirth: z.string().optional().nullable().or(z.literal("")).or(z.literal(null)),
   age: z.coerce.number().int().min(0).max(120).optional().nullable(),
   gender: z.enum(["MALE", "FEMALE", "OTHER"], {
     errorMap: () => ({ message: "Please select a gender" })

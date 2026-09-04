@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const parsed = patientRegisterSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid registration details." },
+        { error: "Invalid registration details.", details: flatten(parsed.error) },
         { status: 400 }
       );
     }
@@ -90,4 +90,13 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+function flatten(error: { issues: Array<{ path: (string | number)[]; message: string }> }) {
+  const result: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = issue.path.join(".");
+    if (!result[key]) result[key] = issue.message;
+  }
+  return result;
 }

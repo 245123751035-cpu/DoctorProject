@@ -300,6 +300,24 @@ const en = {
       error: "Voice input failed. Please type the text instead."
     }
   },
+  chat: {
+    title: "Health Assistant",
+    online: "Always available",
+    close: "Close",
+    placeholder: "Describe your symptoms...",
+    send: "Send",
+    callNow: "Call emergency services (108 / 112) or go to the nearest emergency room now.",
+    selfCare: "What you can do right now",
+    seeDoctor: "When to see a doctor",
+    disclaimer: "This guidance is for information only and is not a substitute for professional medical advice. For emergencies call 108 / 112.",
+    fallback: "Sorry, I couldn't respond right now. Please try again.",
+    urgency: {
+      EMERGENCY: "Emergency",
+      HIGH: "See doctor today",
+      MODERATE: "See a doctor if needed",
+      LOW: "General guidance"
+    }
+  },
   common: {
     loading: "Loading...",
     error: "Something went wrong.",

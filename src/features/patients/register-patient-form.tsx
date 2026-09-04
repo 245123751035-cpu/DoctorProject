@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
 import { languages } from "@/locales/languages";
+import { VoiceInput } from "@/components/voice-input";
 
 const BLOOD_GROUPS = ["A_POS", "A_NEG", "B_POS", "B_NEG", "AB_POS", "AB_NEG", "O_POS", "O_NEG", "UNKNOWN"];
 
@@ -14,6 +15,7 @@ export function RegisterPatientForm() {
   const [loading, setLoading] = useState(false);
   const [created, setCreated] = useState<{ id: string; patientCode: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [values, setValues] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -51,7 +53,12 @@ export function RegisterPatientForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        toast(data.error || t("patient.register.error"), "error");
+        if (data.details && typeof data.details === "object") {
+          setFieldErrors(data.details);
+          setCreated(null);
+        } else {
+          toast(data.error || t("patient.register.error"), "error");
+        }
         return;
       }
       setValues((v) => ({
@@ -67,6 +74,7 @@ export function RegisterPatientForm() {
         existingConditions: ""
       }));
       setCreated(data.patient);
+      setFieldErrors({});
       toast(data.patient?.patientCode ? `Patient ${data.patient.patientCode} registered.` : "Patient registered.", "success");
     } catch {
       toast(t("patient.register.error"), "error");
@@ -132,20 +140,32 @@ export function RegisterPatientForm() {
   const label = "label";
   const input = "input";
 
+  function FieldError({ field }: { field: keyof typeof values }) {
+    const msg = fieldErrors[field];
+    if (!msg) return null;
+    return <p className="text-xs text-red-600 mt-1">{msg}</p>;
+  }
+
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="md:col-span-2 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          Please fix the highlighted fields below before saving.
+        </div>
+      )}
       <div className="md:col-span-2">
         <label className={label} htmlFor="fullName">
           {t("patient.register.fullName")} *
         </label>
-        <input
+        <VoiceInput
           id="fullName"
-          className={input}
+          required
           placeholder={t("patient.register.fullNamePlaceholder")}
           value={values.fullName}
-          onChange={(e) => update("fullName", e.target.value)}
-          required
+          onChange={(v) => update("fullName", v)}
+          className={`${input} ${fieldErrors.fullName ? "border-red-400" : ""}`}
         />
+        <FieldError field="fullName" />
       </div>
 
       <div>
@@ -155,10 +175,11 @@ export function RegisterPatientForm() {
         <input
           id="dateOfBirth"
           type="date"
-          className={input}
+          className={`${input} ${fieldErrors.dateOfBirth ? "border-red-400" : ""}`}
           value={values.dateOfBirth}
           onChange={(e) => update("dateOfBirth", e.target.value)}
         />
+        <FieldError field="dateOfBirth" />
       </div>
 
       <div>
@@ -170,11 +191,12 @@ export function RegisterPatientForm() {
           type="number"
           min={0}
           max={120}
-          className={input}
+          className={`${input} ${fieldErrors.age ? "border-red-400" : ""}`}
           placeholder={t("patient.register.agePlaceholder")}
           value={values.age}
           onChange={(e) => update("age", e.target.value)}
         />
+        <FieldError field="age" />
       </div>
 
       <div>
@@ -183,7 +205,7 @@ export function RegisterPatientForm() {
         </label>
         <select
           id="gender"
-          className={input}
+          className={`${input} ${fieldErrors.gender ? "border-red-400" : ""}`}
           value={values.gender}
           onChange={(e) => update("gender", e.target.value)}
           required
@@ -195,19 +217,21 @@ export function RegisterPatientForm() {
           <option value="FEMALE">{t("patient.register.female")}</option>
           <option value="OTHER">{t("patient.register.other")}</option>
         </select>
+        <FieldError field="gender" />
       </div>
 
       <div>
         <label className={label} htmlFor="phone">
           {t("patient.register.phone")}
         </label>
-        <input
+        <VoiceInput
           id="phone"
-          className={input}
           placeholder={t("patient.register.phonePlaceholder")}
           value={values.phone}
-          onChange={(e) => update("phone", e.target.value)}
+          onChange={(v) => update("phone", v)}
+          className={`${input} ${fieldErrors.phone ? "border-red-400" : ""}`}
         />
+        <FieldError field="phone" />
       </div>
 
       <div>
@@ -216,7 +240,7 @@ export function RegisterPatientForm() {
         </label>
         <select
           id="bloodGroup"
-          className={input}
+          className={`${input} ${fieldErrors.bloodGroup ? "border-red-400" : ""}`}
           value={values.bloodGroup}
           onChange={(e) => update("bloodGroup", e.target.value)}
         >
@@ -227,58 +251,63 @@ export function RegisterPatientForm() {
             </option>
           ))}
         </select>
+        <FieldError field="bloodGroup" />
       </div>
 
       <div>
         <label className={label} htmlFor="emergencyContact">
           {t("patient.register.emergencyContact")}
         </label>
-        <input
+        <VoiceInput
           id="emergencyContact"
-          className={input}
           placeholder={t("patient.register.emergencyContactPlaceholder")}
           value={values.emergencyContact}
-          onChange={(e) => update("emergencyContact", e.target.value)}
+          onChange={(v) => update("emergencyContact", v)}
+          className={`${input} ${fieldErrors.emergencyContact ? "border-red-400" : ""}`}
         />
+        <FieldError field="emergencyContact" />
       </div>
 
       <div className="md:col-span-2">
         <label className={label} htmlFor="address">
           {t("patient.register.address")}
         </label>
-        <input
+        <VoiceInput
           id="address"
-          className={input}
           placeholder={t("patient.register.addressPlaceholder")}
           value={values.address}
-          onChange={(e) => update("address", e.target.value)}
+          onChange={(v) => update("address", v)}
+          className={`${input} ${fieldErrors.address ? "border-red-400" : ""}`}
         />
+        <FieldError field="address" />
       </div>
 
       <div className="md:col-span-2">
         <label className={label} htmlFor="knownAllergies">
           {t("patient.register.knownAllergies")}
         </label>
-        <input
+        <VoiceInput
           id="knownAllergies"
-          className={input}
           placeholder={t("patient.register.knownAllergiesPlaceholder")}
           value={values.knownAllergies}
-          onChange={(e) => update("knownAllergies", e.target.value)}
+          onChange={(v) => update("knownAllergies", v)}
+          className={`${input} ${fieldErrors.knownAllergies ? "border-red-400" : ""}`}
         />
+        <FieldError field="knownAllergies" />
       </div>
 
       <div className="md:col-span-2">
         <label className={label} htmlFor="existingConditions">
           {t("patient.register.existingConditions")}
         </label>
-        <input
+        <VoiceInput
           id="existingConditions"
-          className={input}
           placeholder={t("patient.register.existingConditionsPlaceholder")}
           value={values.existingConditions}
-          onChange={(e) => update("existingConditions", e.target.value)}
+          onChange={(v) => update("existingConditions", v)}
+          className={`${input} ${fieldErrors.existingConditions ? "border-red-400" : ""}`}
         />
+        <FieldError field="existingConditions" />
       </div>
 
       <div className="md:col-span-2">

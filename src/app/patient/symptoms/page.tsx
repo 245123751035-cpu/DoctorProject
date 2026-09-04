@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { currentPatientUser } from "@/lib/auth/current";
 import { PatientHeader } from "@/features/layout/patient-header";
 import { PatientSymptomsForm } from "@/features/patient/symptoms-form";
+import { PatientChatWidget } from "@/features/patient/chat-widget";
 import { t } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default async function PatientSymptomsPage() {
         </p>
         <PatientSymptomsForm />
       </main>
+      <PatientChatWidget />
     </div>
   );
 }
