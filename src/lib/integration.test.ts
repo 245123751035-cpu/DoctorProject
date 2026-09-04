@@ -58,6 +58,8 @@ describe("patient + consultation integration", () => {
       fullName: "Integration Patient",
       gender: "MALE",
       age: 35,
+      dateOfBirth: null,
+      bloodGroup: "",
       phone: "+91 90000 00000"
     });
     patientId = patient.id;

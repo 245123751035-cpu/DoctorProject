@@ -62,7 +62,7 @@ export async function createPatient(input: CreatePatientInput) {
       phone: input.phone || null,
       address: input.address || null,
       emergencyContact: input.emergencyContact || null,
-      bloodGroup: (input.bloodGroup as BloodGroup) ?? null,
+      bloodGroup: ((input.bloodGroup as BloodGroup) || null) as BloodGroup | null,
       knownAllergies: input.knownAllergies || null,
       existingConditions: input.existingConditions || null,
       preferredLanguage: input.preferredLanguage || "en"
