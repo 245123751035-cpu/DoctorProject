@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/providers/locale-provider";
+import { useToast } from "@/components/ui/toast";
 import { AISummary } from "./ai-summary";
 
 export interface PatientProfileData {
@@ -20,6 +21,7 @@ export interface PatientProfileData {
   existingConditions: string | null;
   lastVisit: string | null;
   consultationCount: number;
+  accountEmail?: string | null;
 }
 
 export interface Med {
@@ -134,7 +136,12 @@ export function ProfileTabs({
         </Link>
       </div>
 
-      {tab === "overview" && <Overview patient={patient} t={t} />}
+      {tab === "overview" && (
+        <div className="space-y-4">
+          <Overview patient={patient} t={t} />
+          <AccountLinkCard patientId={patient.id} accountEmail={patient.accountEmail ?? null} />
+        </div>
+      )}
       {tab === "history" && (
         <History
           conditions={conditions}
@@ -194,6 +201,84 @@ function Overview({ patient, t }: { patient: PatientProfileData; t: (k: string) 
         </div>
       ))}
     </div>
+  );
+}
+
+function AccountLinkCard({
+  patientId,
+  accountEmail
+}: {
+  patientId: string;
+  accountEmail: string | null;
+}) {
+  const { t } = useLocale();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function handleLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/patients/link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientId, email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || t("patient.profile.linkError"), "error");
+        return;
+      }
+      toast(t("patient.profile.linkSuccess"), "success");
+      window.location.reload();
+    } catch {
+      toast(t("patient.profile.linkError"), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (accountEmail) {
+    return (
+      <div className="card card-body flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {t("patient.profile.linkedAccount")}
+          </div>
+          <div className="text-sm font-medium mt-1">{accountEmail}</div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          {t("patient.profile.linked")}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleLink} className="card card-body">
+      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {t("patient.profile.linkAccount")}
+      </div>
+      <p className="text-sm text-muted-foreground mt-1">{t("patient.profile.linkAccountHint")}</p>
+      <div className="flex flex-wrap gap-2 mt-3">
+        <input
+          type="email"
+          className="input flex-1 min-w-[220px]"
+          placeholder="patient@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <button type="submit" className="btn-outline" disabled={busy}>
+          {busy ? t("common.loading") : t("patient.profile.linkAccountAction")}
+        </button>
+      </div>
+    </form>
   );
 }
 

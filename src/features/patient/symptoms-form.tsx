@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
@@ -11,6 +11,8 @@ export function PatientSymptomsForm() {
   const { t } = useLocale();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [unlinked, setUnlinked] = useState(false);
   const [values, setValues] = useState({
     complaint: "",
     symptoms: "",
@@ -19,6 +21,24 @@ export function PatientSymptomsForm() {
     duration: "",
     additionalNotes: ""
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/patient-profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setUnlinked(!data.patient);
+      })
+      .catch(() => {
+        if (!cancelled) setUnlinked(false);
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function update(field: keyof typeof values, value: string) {
     setValues((v) => ({ ...v, [field]: value }));
@@ -47,6 +67,26 @@ export function PatientSymptomsForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checking) {
+    return <div className="text-sm text-muted-foreground">{t("common.loading")}</div>;
+  }
+
+  if (unlinked) {
+    return (
+      <div className="card card-body text-center py-14">
+        <div className="mx-auto w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-amber-700" fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h2 className="text-lg font-semibold">{t("patientDashboard.noLinkedRecord")}</h2>
+        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+          {t("patientDashboard.noLinkedRecordHint")}
+        </p>
+      </div>
+    );
   }
 
   return (

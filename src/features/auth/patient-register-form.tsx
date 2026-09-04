@@ -17,8 +17,7 @@ export function PatientRegisterForm() {
     name: "",
     email: "",
     password: "",
-    phone: "",
-    patientCode: ""
+    phone: ""
   });
 
   function update(field: keyof typeof values) {
@@ -79,29 +78,20 @@ export function PatientRegisterForm() {
             {t("auth.patient.register.subtitle")}
           </p>
         </div>
+        <div className="px-6 pt-4">
+          <div className="rounded-md bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-800 flex gap-2">
+            <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <span>{t("auth.patient.register.blankNote")}</span>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className="card-body space-y-4">
           {Object.keys(fieldErrors).length > 0 && (
             <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               Please fix the highlighted fields below before submitting.
             </div>
           )}
-          <div>
-            <label className={label} htmlFor="patientCode">
-              {t("auth.patient.register.patientCode")} *
-            </label>
-            <input
-              id="patientCode"
-              className={`${input} ${fieldErrors.patientCode ? "border-red-400" : ""}`}
-              placeholder="e.g. MX-6660"
-              value={values.patientCode}
-              onChange={update("patientCode")}
-              required
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("auth.patient.register.patientCodeHint")}
-            </p>
-            <FieldError field="patientCode" />
-          </div>
           <div>
             <label className={label} htmlFor="name">
               {t("auth.register.name")} *

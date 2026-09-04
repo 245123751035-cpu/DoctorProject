@@ -56,10 +56,9 @@ const en = {
         error: "Incorrect email or password."
       },
       register: {
-        title: "Patient Registration",
-        subtitle: "Create an account to access your medical records",
-        patientCode: "Patient Code",
-        patientCodeHint: "Ask your doctor for your patient code (e.g. MX-6660)",
+        title: "Create your patient account",
+        subtitle: "Sign up with your basic details to get started",
+        blankNote: "Your account starts empty. Once your doctor links your records to this account, everything will appear here automatically.",
         submit: "Create account",
         hasAccount: "Already have an account?",
         loginLink: "Login",
@@ -104,6 +103,8 @@ const en = {
     viewRecordsHint: "View your medical history and doctor notes",
     recentVisits: "Recent Visits",
     noRecords: "No records yet. Your medical information will appear here.",
+    noLinkedRecord: "No medical records yet",
+    noLinkedRecordHint: "Your records will appear here once your doctor links your records to this account. In the meantime, you can chat with the Health Assistant for quick guidance.",
     noConditions: "No conditions recorded",
     doctorRecords: "Doctor Records",
     yourReport: "Your Report",
@@ -193,7 +194,14 @@ const en = {
       noInvestigations: "No investigations recorded.",
       notAvailable: "Not available",
       patientReports: "Patient Reports",
-      noReports: "No patient reports yet."
+      noReports: "No patient reports yet.",
+      linkedAccount: "Linked patient account",
+      linked: "Linked",
+      linkAccount: "Link patient account",
+      linkAccountHint: "Ask the patient to register on the patient app, then enter their account email here to connect this medical record to it.",
+      linkAccountAction: "Link account",
+      linkSuccess: "Patient account linked successfully.",
+      linkError: "Something went wrong while linking the account."
     },
     timeline: {
       title: "Medical History Timeline",

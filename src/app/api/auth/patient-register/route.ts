@@ -1,50 +1,27 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
 import { createPatientSession, SESSION_COOKIE } from "@/lib/auth/session";
+import { patientSignupSchema } from "@/lib/validation/schemas";
 import { writeAuditLog } from "@/services/audit";
-
-const patientRegisterSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters").max(128),
-  phone: z.string().max(20).optional().or(z.literal("")),
-  patientCode: z.string().min(1, "Patient code is required")
-});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
-    const parsed = patientRegisterSchema.safeParse(body);
+    const parsed = patientSignupSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid registration details.", details: flatten(parsed.error) },
+        { error: "Please check the highlighted fields below.", details: flatten(parsed.error) },
         { status: 400 }
       );
     }
 
-    const { name, email, password, phone, patientCode } = parsed.data;
+    const { name, email, password, phone } = parsed.data;
 
     const existing = await db.patientUser.findUnique({ where: { email: email.toLowerCase() } });
     if (existing) {
       return NextResponse.json(
         { error: "An account with this email already exists." },
-        { status: 409 }
-      );
-    }
-
-    const normalizedCode = patientCode.toUpperCase().trim();
-    const patient = await db.patient.findUnique({ where: { patientCode: normalizedCode } });
-    if (!patient) {
-      return NextResponse.json(
-        { error: "No patient found with this code. Please check the code provided by your doctor." },
-        { status: 404 }
-      );
-    }
-    if (patient.patientUserId) {
-      return NextResponse.json(
-        { error: "This patient code is already linked to an account." },
         { status: 409 }
       );
     }
@@ -60,14 +37,9 @@ export async function POST(request: Request) {
       }
     });
 
-    await db.patient.update({
-      where: { id: patient.id },
-      data: { patientUserId: patientUser.id }
-    });
-
     const sessionCookie = await createPatientSession(patientUser.id);
 
-    writeAuditLog({ patientId: patient.id, action: "patient.register", details: patientUser.email });
+    writeAuditLog({ action: "patient.register", details: patientUser.email });
 
     const response = NextResponse.json(
       { ok: true, patient: { id: patientUser.id, name: patientUser.name, email: patientUser.email } },

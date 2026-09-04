@@ -25,6 +25,19 @@ export const patientCodeSchema = z.string().refine(
   "Patient code must look like MX-1234"
 );
 
+export const patientSignupSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name is too long"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password is too long"),
+  phone: z.string().max(20, "Phone number is too long").optional().or(z.literal(""))
+});
+
 export const patientRegisterSchema = z.object({
   fullName: z.string().min(2, "Full name is required").max(150),
   dateOfBirth: z.string().optional().nullable().or(z.literal("")).or(z.literal(null)),

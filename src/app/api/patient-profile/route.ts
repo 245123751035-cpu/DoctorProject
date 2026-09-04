@@ -24,7 +24,7 @@ export async function GET() {
     });
 
     if (!patient) {
-      return NextResponse.json({ error: "No patient profile found" }, { status: 404 });
+      return NextResponse.json({ ok: true, patient: null });
     }
 
     return NextResponse.json({

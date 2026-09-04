@@ -52,10 +52,26 @@ export function PatientDashboardContent() {
     return <div className="text-sm text-muted-foreground">{t("common.loading")}</div>;
   }
 
-  if (error || !profile) {
+  if (error) {
     return (
       <div className="card card-body">
         <p className="text-red-600">{error || t("common.error")}</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="card card-body text-center py-14">
+        <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-green-700" fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="text-lg font-semibold">{t("patientDashboard.noLinkedRecord")}</h2>
+        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+          {t("patientDashboard.noLinkedRecordHint")}
+        </p>
       </div>
     );
   }

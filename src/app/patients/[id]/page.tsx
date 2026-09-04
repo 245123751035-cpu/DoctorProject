@@ -29,6 +29,13 @@ export default async function PatientProfilePage({
     ? patient.consultations[patient.consultations.length - 1].createdAt.toISOString()
     : null;
 
+  const linkedUser = patient.patientUserId
+    ? await db.patientUser.findUnique({
+        where: { id: patient.patientUserId },
+        select: { email: true }
+      })
+    : null;
+
   const profileData: PatientProfileData = {
     id: patient.id,
     fullName: patient.fullName,
@@ -43,7 +50,8 @@ export default async function PatientProfilePage({
     knownAllergies: patient.knownAllergies,
     existingConditions: patient.existingConditions,
     lastVisit,
-    consultationCount: patient._count.consultations
+    consultationCount: patient._count.consultations,
+    accountEmail: linkedUser?.email ?? null
   };
 
   const serializedConsultations: ConsultationRow[] = patient.consultations.map((c) => ({
