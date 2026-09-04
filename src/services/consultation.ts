@@ -27,6 +27,8 @@ export async function createConsultation(
       investigations: input.investigations || null,
       doctorObservations: input.doctorObservations || null,
       assessment: input.assessment || null,
+      diagnosis: input.diagnosis || null,
+      prescription: input.prescription || null,
       followUpNotes: input.followUpNotes || null
     }
   });

@@ -7,7 +7,9 @@ const te: Record<string, unknown> = {
   nav: {
     dashboard: "డాష్బోర్డ్",
     registerPatient: "రోగిని నమోదు చేయండి",
-    logout: "లాగ్అవుట్"
+    logout: "లాగ్అవుట్",
+    myRecords: "నా రికార్డులు",
+    reportSymptoms: "లక్షణాలు నివేదించండి"
   },
   auth: {
     login: {
@@ -21,7 +23,9 @@ const te: Record<string, unknown> = {
       noAccount: "ఖాతా లేదా?",
       registerLink: "డాక్టర్గా నమోదు చేయండి",
       error: "తప్పు ఇమెయిల్ లేదా పాస్వర్డ్.",
-      genericError: "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి."
+      genericError: "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+      asDoctor: "డాక్టర్ లాగిన్",
+      asPatient: "రోగి లాగిన్"
     },
     register: {
       title: "డాక్టర్ నమోదు",
@@ -40,6 +44,28 @@ const te: Record<string, unknown> = {
       hasAccount: "ఇప్పటికే ఖాతా ఉందా?",
       loginLink: "లాగిన్",
       error: "నమోదు విఫలమైంది. ఈ ఇమెయిల్ ఇప్పటికే నమోదు చేయబడి ఉండవచ్చు."
+    },
+    patient: {
+      login: {
+        title: "రోగి లాగిన్",
+        subtitle: "మీ వైద్య రికార్డులు చూడటానికి సైన్ ఇన్ చేయండి",
+        submit: "లాగిన్",
+        noAccount: "ఖాతా లేదా?",
+        registerLink: "రోగిగా నమోదు చేయండి",
+        doctorLogin: "డాక్టరా? ఇక్కడ లాగిన్ చేయండి",
+        error: "తప్పు ఇమెయిల్ లేదా పాస్వర్డ్."
+      },
+      register: {
+        title: "రోగి నమోదు",
+        subtitle: "మీ వైద్య రికార్డులను యాక్సెస్ చేయడానికి ఖాతా సృష్టించండి",
+        patientCode: "రోగి కోడ్",
+        patientCodeHint: "మీ డాక్టర్ నుండి మీ రోగి కోడ్ అడగండి (ఉదా. MX-6660)",
+        submit: "ఖాతా సృష్టించండి",
+        hasAccount: "ఇప్పటికే ఖాతా ఉందా?",
+        loginLink: "లాగిన్",
+        success: "ఖాతా విజయవంతంగా సృష్టించబడింది!",
+        error: "నమోదు విఫలమైంది. దయచేసి మీ వివరాలు తనిఖీ చేయండి."
+      }
     }
   },
   dashboard: {
@@ -133,7 +159,9 @@ const te: Record<string, unknown> = {
       noMedications: "మందులు నమోదు కాలేదు.",
       noAllergies: "అలర్జీలు నమోదు కాలేదు.",
       noInvestigations: "పరీక్షలు నమోదు కాలేదు.",
-      notAvailable: "అందుబాటులో లేదు"
+      notAvailable: "అందుబాటులో లేదు",
+      patientReports: "రోగి నివేదికలు",
+      noReports: "ఇంకా నివేదికలు లేవు."
     },
     timeline: {
       title: "వైద్య చరిత్ర టైమ్లైన్",
@@ -169,7 +197,58 @@ const te: Record<string, unknown> = {
       disclaimer: "సమీక్ష కోసం AI-ఉత్పత్తి సారాంశం. ఇది వృత్తిపరమైన వైద్య నిర్ణయాన్ని భర్తీ చేయదు.",
       error: "ప్రస్తుతం AI సారాంశాన్ని రూపొందించలేకపోయాం. రోగి నిల్వ చేసిన చరిత్ర ఇప్పటికీ అందుబాటులో ఉంది.",
       recent: "ఇటీవల"
+    },
+    symptoms: {
+      yourComplaint: "మీ ఫిర్యాదు",
+      complaint: "ఈరోజు మీరు ఎందుకు వచ్చారు?",
+      complaintPlaceholder: "మీ ప్రధాన సమస్య వివరించండి",
+      symptoms: "మీ లక్షణాలు",
+      symptomsPlaceholder: "మీ లక్షణాలు వివరించండి",
+      duration: "ఎంత కాలంగా?",
+      durationPlaceholder: "ఉదా. 3 రోజులు",
+      currentCondition: "ప్రస్తుత పరిస్థితి",
+      currentConditionPlaceholder: "తీవ్రమవుతోందా, మెరుగవుతోందా",
+      yourHistory: "మీ వైద్య చరిత్ర",
+      medicalHistory: "వైద్య చరిత్ర",
+      medicalHistoryPlaceholder: "గత వ్యాధులు వివరించండి",
+      additionalNotes: "అదనపు నోట్స్",
+      additionalNotesPlaceholder: "ఇతర సమాచారం",
+      submit: "నివేదిక సేవ్ చేయండి",
+      success: "నివేదిక సేవ్ చేయబడింది.",
+      error: "నివేదిక సేవ్ చేయడంలో విఫలమైంది."
     }
+  },
+  patientDashboard: {
+    welcome: "స్వాగతం",
+    subtitle: "మీ వైద్య సమాచారం చూడండి మరియు లక్షణాలు నివేదించండి",
+    myProfile: "నా ప్రొఫైల్",
+    summary: "సారాంశం",
+    visits: "సందర్శనలు",
+    myReports: "నా నివేదికలు",
+    medications: "మందులు",
+    doctor: "డాక్టర్",
+    clinic: "క్లినిక్",
+    reportSymptoms: "లక్షణాలు నివేదించండి",
+    reportSymptomsHint: "మీ ప్రస్తుత లక్షణాలు మీ డాక్టర్‌కు తెలియజేయండి",
+    viewRecords: "నా రికార్డులు",
+    viewRecordsHint: "మీ వైద్య చరిత్ర మరియు డాక్టర్ నోట్స్ చూడండి",
+    recentVisits: "ఇటీవలి సందర్శనలు",
+    noRecords: "ఇంకా రికార్డులు లేవు. మీ వైద్య సమాచారం ఇక్కడ కనిపిస్తుంది.",
+    noConditions: "నమోదు చేయబడిన పరిస్థితులు లేవు",
+    doctorRecords: "డాక్టర్ రికార్డులు",
+    yourReport: "మీ నివేదిక",
+    complaint: "ఫిర్యాదు",
+    symptoms: "లక్షణాలు",
+    medicalHistory: "వైద్య చరిత్ర",
+    currentCondition: "ప్రస్తుత పరిస్థితి",
+    additionalNotes: "అదనపు నోట్స్",
+    doctorInformation: "డాక్టర్ సమాచారం",
+    observations: "డాక్టర్ పరిశీలనలు",
+    assessment: "అంచనా",
+    diagnosis: "నిర్ధారణ",
+    prescription: "ప్రిస్క్రిప్షన్",
+    followUp: "ఫాలో-అప్ నోట్స్",
+    chiefComplaint: "ప్రధాన ఫిర్యాదు"
   },
   consultation: {
     new: {
@@ -203,6 +282,10 @@ const te: Record<string, unknown> = {
       doctorObservationsPlaceholder: "పరీక్షలో క్లినికల్ ఫలితాలు",
       assessment: "డాక్టర్ అంచనా",
       assessmentPlaceholder: "కేసుపై మీ అంచనా",
+      diagnosis: "నిర్ధారణ",
+      diagnosisPlaceholder: "మీ నిర్ధారణ",
+      prescription: "ప్రిస్క్రిప్షన్",
+      prescriptionPlaceholder: "నిర్ణయించిన మందులు మరియు సూచనలు",
       followUpNotes: "ఫాలో-అప్ నోట్స్",
       followUpNotesPlaceholder: "ప్రణాళిక మరియు ఫాలో-అప్ సూచనలు",
       submit: "కన్సల్టేషన్ సేవ్ చేయండి",

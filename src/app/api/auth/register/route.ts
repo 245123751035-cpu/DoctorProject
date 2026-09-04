@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validation/schemas";
 import { hashPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
-import { createSession, SESSION_COOKIE } from "@/lib/auth/session";
+import { createDoctorSession, SESSION_COOKIE } from "@/lib/auth/session";
 import { writeAuditLog } from "@/services/audit";
 
 export async function POST(request: Request) {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       }
     });
 
-    const sessionCookie = await createSession(doctor.id);
+    const sessionCookie = await createDoctorSession(doctor.id);
 
     writeAuditLog({ doctorId: doctor.id, action: "doctor.register" });
 

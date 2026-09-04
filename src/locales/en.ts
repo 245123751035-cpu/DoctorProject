@@ -7,7 +7,9 @@ const en = {
   nav: {
     dashboard: "Dashboard",
     registerPatient: "Register Patient",
-    logout: "Logout"
+    logout: "Logout",
+    myRecords: "My Records",
+    reportSymptoms: "Report Symptoms"
   },
   auth: {
     login: {
@@ -21,7 +23,9 @@ const en = {
       noAccount: "Don't have an account?",
       registerLink: "Register as a doctor",
       error: "Incorrect email or password.",
-      genericError: "Something went wrong. Please try again."
+      genericError: "Something went wrong. Please try again.",
+      asDoctor: "Doctor Login",
+      asPatient: "Patient Login"
     },
     register: {
       title: "Register Doctor",
@@ -40,6 +44,28 @@ const en = {
       hasAccount: "Already have an account?",
       loginLink: "Login",
       error: "Registration failed. That email may already be registered."
+    },
+    patient: {
+      login: {
+        title: "Patient Login",
+        subtitle: "Sign in to view your medical records",
+        submit: "Login",
+        noAccount: "Don't have an account?",
+        registerLink: "Register as a patient",
+        doctorLogin: "Doctor? Login here",
+        error: "Incorrect email or password."
+      },
+      register: {
+        title: "Patient Registration",
+        subtitle: "Create an account to access your medical records",
+        patientCode: "Patient Code",
+        patientCodeHint: "Ask your doctor for your patient code (e.g. MX-6660)",
+        submit: "Create account",
+        hasAccount: "Already have an account?",
+        loginLink: "Login",
+        success: "Account created successfully!",
+        error: "Registration failed. Please check your details."
+      }
     }
   },
   dashboard: {
@@ -61,6 +87,38 @@ const en = {
     never: "Never",
     open: "Open",
     consultationsShort: "consultations"
+  },
+  patientDashboard: {
+    welcome: "Welcome",
+    subtitle: "View your medical information and report symptoms",
+    myProfile: "My Profile",
+    summary: "Summary",
+    visits: "Visits",
+    myReports: "My Reports",
+    medications: "Medications",
+    doctor: "Doctor",
+    clinic: "Clinic",
+    reportSymptoms: "Report Symptoms",
+    reportSymptomsHint: "Share your current symptoms with your doctor",
+    viewRecords: "My Records",
+    viewRecordsHint: "View your medical history and doctor notes",
+    recentVisits: "Recent Visits",
+    noRecords: "No records yet. Your medical information will appear here.",
+    noConditions: "No conditions recorded",
+    doctorRecords: "Doctor Records",
+    yourReport: "Your Report",
+    complaint: "Complaint",
+    symptoms: "Symptoms",
+    medicalHistory: "Medical History",
+    currentCondition: "Current Condition",
+    additionalNotes: "Additional Notes",
+    doctorInformation: "Doctor Information",
+    observations: "Doctor Observations",
+    assessment: "Assessment",
+    diagnosis: "Diagnosis",
+    prescription: "Prescription",
+    followUp: "Follow-up Notes",
+    chiefComplaint: "Chief Complaint"
   },
   patient: {
     register: {
@@ -133,7 +191,9 @@ const en = {
       noMedications: "No medications recorded.",
       noAllergies: "No allergies recorded.",
       noInvestigations: "No investigations recorded.",
-      notAvailable: "Not available"
+      notAvailable: "Not available",
+      patientReports: "Patient Reports",
+      noReports: "No patient reports yet."
     },
     timeline: {
       title: "Medical History Timeline",
@@ -169,6 +229,25 @@ const en = {
       disclaimer: "AI-generated summary for clinician review. It does not replace professional medical judgment.",
       error: "Unable to generate the AI summary right now. Your patient's stored history is still available.",
       recent: "Recent"
+    },
+    symptoms: {
+      yourComplaint: "Your Complaint",
+      complaint: "What brings you in today?",
+      complaintPlaceholder: "Describe your main concern or reason for visiting",
+      symptoms: "Your Symptoms",
+      symptomsPlaceholder: "Describe any symptoms you are experiencing",
+      duration: "How long?",
+      durationPlaceholder: "e.g. 3 days, 2 weeks",
+      currentCondition: "Current Condition",
+      currentConditionPlaceholder: "e.g. Worsening, Improving, Same",
+      yourHistory: "Your Medical History",
+      medicalHistory: "Medical History",
+      medicalHistoryPlaceholder: "Describe any past medical conditions, surgeries, or ongoing treatments",
+      additionalNotes: "Additional Notes",
+      additionalNotesPlaceholder: "Any other information you want your doctor to know",
+      submit: "Save Report",
+      success: "Report saved successfully. Your doctor will review this.",
+      error: "Failed to save report. Please try again."
     }
   },
   consultation: {
@@ -203,6 +282,10 @@ const en = {
       doctorObservationsPlaceholder: "Clinical findings on examination",
       assessment: "Doctor's assessment",
       assessmentPlaceholder: "Your assessment of the case",
+      diagnosis: "Diagnosis",
+      diagnosisPlaceholder: "Your diagnosis",
+      prescription: "Prescription",
+      prescriptionPlaceholder: "Prescribed medications and instructions",
       followUpNotes: "Follow-up notes",
       followUpNotesPlaceholder: "Plan and follow-up instructions",
       submit: "Save Consultation",

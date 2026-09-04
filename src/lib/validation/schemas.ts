@@ -58,6 +58,8 @@ export const consultationSchema = z.object({
   investigations: z.string().max(4000).optional().or(z.literal("")),
   doctorObservations: z.string().max(4000).optional().or(z.literal("")),
   assessment: z.string().max(4000).optional().or(z.literal("")),
+  diagnosis: z.string().max(4000).optional().or(z.literal("")),
+  prescription: z.string().max(4000).optional().or(z.literal("")),
   followUpNotes: z.string().max(4000).optional().or(z.literal(""))
 });
 

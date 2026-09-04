@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { db } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
-import { createSession, getDoctorFromCookie, destroySession } from "@/lib/auth/session";
+import { createDoctorSession, getDoctorFromCookie, destroySession } from "@/lib/auth/session";
 import { createPatient, searchPatients, getPatientById } from "@/services/patient";
 import { createConsultation } from "@/services/consultation";
 
@@ -34,7 +34,7 @@ describe("authentication integration", () => {
   });
 
   it("creates a session and resolves the doctor from the cookie", async () => {
-    cookie = await createSession(doctorId);
+    cookie = await createDoctorSession(doctorId);
     const resolved = await getDoctorFromCookie(cookie);
     expect(resolved?.id).toBe(doctorId);
   });

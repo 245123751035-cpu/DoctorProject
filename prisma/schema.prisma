@@ -42,10 +42,24 @@ model Doctor {
   sessions      Session[]
 }
 
+model PatientUser {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  patient       Patient?
+  sessions      Session[]
+}
+
 model Patient {
   id                  String   @id @default(uuid())
   patientCode         String   @unique
   doctorId            String
+  patientUserId       String?  @unique
   fullName            String
   dateOfBirth         DateTime?
   age                 Int?
@@ -61,6 +75,7 @@ model Patient {
   updatedAt           DateTime @updatedAt
 
   doctor              Doctor                    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patientUser         PatientUser?              @relation(fields: [patientUserId], references: [id], onDelete: SetNull)
   consultations       Consultation[]
   medications         Medication[]
   allergies           Allergy[]
@@ -68,10 +83,30 @@ model Patient {
   medicalConditions   PatientMedicalCondition[]
   auditLogs           AuditLog[]
   aiSummaries         AiSummary[]
+  patientReports      PatientReport[]
 
   @@index([doctorId])
   @@index([patientCode])
   @@index([fullName])
+  @@index([patientUserId])
+}
+
+model PatientReport {
+  id                String   @id @default(uuid())
+  patientId         String
+  symptoms          String?
+  complaint         String?
+  medicalHistory    String?
+  currentCondition  String?
+  duration          String?
+  additionalNotes   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  patient           Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([createdAt])
 }
 
 model Consultation {
@@ -91,6 +126,8 @@ model Consultation {
   investigations       String?
   doctorObservations   String?
   assessment           String?
+  diagnosis            String?
+  prescription         String?
   followUpNotes        String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -174,15 +211,18 @@ model AiSummary {
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  doctorId  String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  token         String   @unique
+  doctorId      String?
+  patientUserId String?
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
 
-  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  doctor        Doctor?       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patientUser   PatientUser?  @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
 
   @@index([doctorId])
+  @@index([patientUserId])
   @@index([expiresAt])
 }
 

@@ -5,6 +5,7 @@ import { AppHeader } from "@/features/layout/app-header";
 import { getPatientById } from "@/services/patient";
 import { ProfileTabs, type PatientProfileData, type ConsultationRow } from "@/features/patients/profile-tabs";
 import { t } from "@/lib/i18n-server";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,11 @@ export default async function PatientProfilePage({
 
   const patient = await getPatientById(doctor.id, params.id);
   if (!patient) notFound();
+
+  const patientReports = await db.patientReport.findMany({
+    where: { patientId: params.id },
+    orderBy: { createdAt: "desc" }
+  });
 
   const lastVisit = patient.consultations.length
     ? patient.consultations[patient.consultations.length - 1].createdAt.toISOString()
@@ -55,6 +61,8 @@ export default async function PatientProfilePage({
     investigations: c.investigations,
     doctorObservations: c.doctorObservations,
     assessment: c.assessment,
+    diagnosis: c.diagnosis,
+    prescription: c.prescription,
     followUpNotes: c.followUpNotes
   }));
 
@@ -78,6 +86,17 @@ export default async function PatientProfilePage({
     id: c.id,
     name: c.name,
     notes: c.notes
+  }));
+
+  const serializedReports = patientReports.map((r) => ({
+    id: r.id,
+    createdAt: r.createdAt.toISOString(),
+    symptoms: r.symptoms,
+    complaint: r.complaint,
+    medicalHistory: r.medicalHistory,
+    currentCondition: r.currentCondition,
+    duration: r.duration,
+    additionalNotes: r.additionalNotes
   }));
 
   return (
@@ -128,6 +147,7 @@ export default async function PatientProfilePage({
           allergies={allergies}
           investigations={investigations}
           conditions={conditions}
+          patientReports={serializedReports}
         />
       </main>
     </div>

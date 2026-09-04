@@ -13,6 +13,8 @@ export interface TimelineConsultation {
   investigations?: string | null;
   doctorObservations?: string | null;
   assessment?: string | null;
+  diagnosis?: string | null;
+  prescription?: string | null;
   followUpNotes?: string | null;
 }
 
@@ -59,6 +61,8 @@ export function ConsultationTimeline({
               {c.investigations && <Field label={t("patient.timeline.investigations")} value={c.investigations} />}
               {c.doctorObservations && <Field label={t("patient.timeline.doctorObservations")} value={c.doctorObservations} />}
               {c.assessment && <Field label={t("patient.timeline.assessment")} value={c.assessment} />}
+              {c.diagnosis && <Field label={t("consultation.new.diagnosis")} value={c.diagnosis} />}
+              {c.prescription && <Field label={t("consultation.new.prescription")} value={c.prescription} />}
               {c.followUpNotes && <Field label={t("patient.timeline.followUpNotes")} value={c.followUpNotes} />}
             </div>
           </div>

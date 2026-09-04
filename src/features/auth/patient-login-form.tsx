@@ -7,7 +7,7 @@ import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
 import { LanguageSelector } from "@/components/language-selector";
 
-export function LoginForm({ role }: { role?: "doctor" } = {}) {
+export function PatientLoginForm() {
   const router = useRouter();
   const { t } = useLocale();
   const { toast } = useToast();
@@ -20,17 +20,17 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/patient-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (!res.ok) {
-        toast(data.error || t("auth.login.error"), "error");
+        toast(data.error || t("auth.patient.login.error"), "error");
         return;
       }
-      router.push("/");
+      router.push("/patient/dashboard");
       router.refresh();
     } catch {
       toast(t("auth.login.genericError"), "error");
@@ -50,20 +50,11 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
         <p className="text-sm text-muted-foreground mt-1">{t("brand.subtitle")}</p>
       </div>
 
-      <div className="flex gap-3 mb-6">
-        <Link href="/login" className="btn-primary">
-          {t("auth.login.asDoctor")}
-        </Link>
-        <Link href="/patient/login" className="btn-outline">
-          {t("auth.login.asPatient")}
-        </Link>
-      </div>
-
       <div className="card w-full max-w-md">
         <div className="card-header">
-          <h2 className="text-xl font-semibold">{t("auth.login.title")}</h2>
+          <h2 className="text-xl font-semibold">{t("auth.patient.login.title")}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {t("auth.login.subtitle")}
+            {t("auth.patient.login.subtitle")}
           </p>
         </div>
         <form onSubmit={handleSubmit} className="card-body space-y-4">
@@ -75,7 +66,7 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
               id="email"
               type="email"
               className="input"
-              placeholder={t("auth.login.emailPlaceholder")}
+              placeholder="patient@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -98,15 +89,21 @@ export function LoginForm({ role }: { role?: "doctor" } = {}) {
             />
           </div>
           <button type="submit" className="btn-primary w-full" disabled={loading}>
-            {loading ? t("common.loading") : t("auth.login.submit")}
+            {loading ? t("common.loading") : t("auth.patient.login.submit")}
           </button>
         </form>
       </div>
 
       <p className="mt-4 text-sm text-muted-foreground">
-        {t("auth.login.noAccount")}{" "}
-        <Link href="/register" className="text-blue-600 hover:underline">
-          {t("auth.login.registerLink")}
+        {t("auth.patient.login.noAccount")}{" "}
+        <Link href="/patient/register" className="text-blue-600 hover:underline">
+          {t("auth.patient.login.registerLink")}
+        </Link>
+      </p>
+
+      <p className="mt-2 text-sm text-muted-foreground">
+        <Link href="/login" className="text-blue-600 hover:underline">
+          {t("auth.patient.login.doctorLogin")}
         </Link>
       </p>
     </div>

@@ -8,7 +8,9 @@ async function main() {
   console.log("Seeding demo data...");
 
   const DEMO_PASSWORD = "Doctor@123";
+  const PATIENT_PASSWORD = "Patient@123";
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const patientPasswordHash = await bcrypt.hash(PATIENT_PASSWORD, 12);
 
   const demoDoctor = await prisma.doctor.create({
     data: {
@@ -21,6 +23,26 @@ async function main() {
   });
   console.log("Demo doctor created:", demoDoctor.email);
 
+  const patientUsers = [
+    { name: "Ravi Kumar", email: "ravi.demo@example.com" },
+    { name: "Ananya Verma", email: "ananya.demo@example.com" },
+    { name: "Mohammed Irfan", email: "mohammed.demo@example.com" }
+  ];
+
+  const createdPatientUsers = [];
+  for (const pu of patientUsers) {
+    const user = await prisma.patientUser.create({
+      data: {
+        name: pu.name,
+        email: pu.email,
+        passwordHash: patientPasswordHash,
+        phone: "+91 90000 " + Math.floor(10000 + Math.random() * 90000)
+      }
+    });
+    createdPatientUsers.push(user);
+    console.log("Patient user created:", user.email);
+  }
+
   const patients = [
     {
       fullName: "Ravi Kumar",
@@ -32,6 +54,7 @@ async function main() {
       knownAllergies: "Penicillin",
       existingConditions: "Hypertension, Type 2 Diabetes",
       preferredLanguage: "te",
+      patientUserIndex: 0,
       consultations: [
         {
           createdAt: daysAgo(240),
@@ -48,6 +71,8 @@ async function main() {
           investigations: "Blood pressure 150/95 mmHg at presentation",
           doctorObservations: "BP elevated. Rest of systemic exam normal.",
           assessment: "Headache likely tension-type, monitor BP control.",
+          diagnosis: "Tension-type headache with poorly controlled hypertension",
+          prescription: "Continue Losartan 50mg, add Amlodipine 5mg if BP remains elevated",
           followUpNotes: "Continue current medicines, review BP readings, follow up in 2 weeks."
         },
         {
@@ -65,6 +90,8 @@ async function main() {
           investigations: "BP 140/88 mmHg, FBS 128 mg/dL",
           doctorObservations: "BP improving. Advised continued salt restriction.",
           assessment: "Hypertension responding to current treatment.",
+          diagnosis: "Improved hypertension control",
+          prescription: "Continue current medications",
           followUpNotes: "Repeat HbA1c in 3 months."
         },
         {
@@ -82,6 +109,8 @@ async function main() {
           investigations: "HbA1c 7.1%, BP 135/84 mmHg",
           doctorObservations: "Well controlled.",
           assessment: "T2DM stable.",
+          diagnosis: "Stable Type 2 Diabetes Mellitus",
+          prescription: "Continue Metformin 500mg BD, Losartan 50mg OD",
           followUpNotes: "Continue care, review in 4 months."
         }
       ]
@@ -96,6 +125,7 @@ async function main() {
       knownAllergies: "Sulphonamides",
       existingConditions: "Asthma",
       preferredLanguage: "hi",
+      patientUserIndex: 1,
       consultations: [
         {
           createdAt: daysAgo(200),
@@ -112,6 +142,8 @@ async function main() {
           investigations: "Chest auscultation shows bilateral wheeze",
           doctorObservations: "Wheeze both lung fields.",
           assessment: "Acute asthma exacerbation, mild to moderate.",
+          diagnosis: "Acute asthma exacerbation",
+          prescription: "Salbutamol inhaler PRN, consider ICS if symptoms persist",
           followUpNotes: "Use regular inhaler, avoid triggers, follow up if worsening."
         },
         {
@@ -129,6 +161,8 @@ async function main() {
           investigations: "PEV/US surrogate: no wheeze at rest",
           doctorObservations: "No distress, clear lung fields.",
           assessment: "Asthma well controlled.",
+          diagnosis: "Well-controlled asthma",
+          prescription: "Continue salbutamol PRN, ensure correct inhaler technique",
           followUpNotes: "Ensure correct inhaler technique."
         },
         {
@@ -146,6 +180,8 @@ async function main() {
           investigations: "Clinical examination",
           doctorObservations: "Localised papular erythematous rash forearms.",
           assessment: "Likely contact dermatitis, advise avoidance of irritants.",
+          diagnosis: "Contact dermatitis",
+          prescription: "Avoid irritants, moisturise regularly, mild topical steroid if needed",
           followUpNotes: "If rash persists in 1 week, review."
         }
       ]
@@ -160,6 +196,7 @@ async function main() {
       knownAllergies: "None known",
       existingConditions: "Ischaemic heart disease, Hyperlipidaemia",
       preferredLanguage: "en",
+      patientUserIndex: 2,
       consultations: [
         {
           createdAt: daysAgo(300),
@@ -176,6 +213,8 @@ async function main() {
           investigations: "ECG: ST changes in inferior leads. Treadmill test positive.",
           doctorObservations: "BP 138/86 mmHg, HR 74, no murmur.",
           assessment: "Stable angina, optimise medical therapy.",
+          diagnosis: "Stable angina pectoris",
+          prescription: "Continue Aspirin, Atorvastatin, Metoprolol. Refer cardiology.",
           followUpNotes: "Refer to cardiology for further evaluation."
         },
         {
@@ -193,6 +232,8 @@ async function main() {
           investigations: "Angiography: single vessel stenosis ~60%. Lipids controlled.",
           doctorObservations: "Stable, well maintained.",
           assessment: "Stable IHD, continue medical therapy.",
+          diagnosis: "Stable IHD, single vessel disease",
+          prescription: "Continue current medications, cardiac rehab",
           followUpNotes: "Continue medicines, cardiac rehab, review in 3 months."
         },
         {
@@ -210,6 +251,8 @@ async function main() {
           investigations: "BP 132/82 mmHg, lipid profile within target.",
           doctorObservations: "Stable.",
           assessment: "Stable, treatment effective.",
+          diagnosis: "Stable IHD",
+          prescription: "Continue current medications",
           followUpNotes: "Continue therapy, annual review."
         },
         {
@@ -227,6 +270,8 @@ async function main() {
           investigations: "Clinical. X-ray suggested.",
           doctorObservations: "Knee crepitus, no effusion.",
           assessment: "Likely degenerative joint disease. Avoid NSAIDs given cardiac history.",
+          diagnosis: "Bilateral knee osteoarthritis",
+          prescription: "Paracetamol PRN, physiotherapy, avoid NSAIDs",
           followUpNotes: "Physiotherapy and paracetamol if needed."
         }
       ]
@@ -239,6 +284,7 @@ async function main() {
       data: {
         patientCode: code,
         doctorId: demoDoctor.id,
+        patientUserId: createdPatientUsers[p.patientUserIndex].id,
         fullName: p.fullName,
         gender: p.gender,
         age: p.age,
@@ -280,6 +326,8 @@ async function main() {
           investigations: c.investigations,
           doctorObservations: c.doctorObservations,
           assessment: c.assessment,
+          diagnosis: c.diagnosis,
+          prescription: c.prescription,
           followUpNotes: c.followUpNotes
         }
       });
@@ -290,9 +338,15 @@ async function main() {
 
   console.log("\nSeed complete!");
   console.log("====================");
-  console.log("DEMO LOGIN");
+  console.log("DEMO DOCTOR LOGIN");
   console.log("Email:    demo@doctordemo.com");
   console.log("Password: Doctor@123");
+  console.log("====================");
+  console.log("DEMO PATIENT LOGINS");
+  console.log("Email:    ravi.demo@example.com");
+  console.log("Email:    ananya.demo@example.com");
+  console.log("Email:    mohammed.demo@example.com");
+  console.log("Password: Patient@123");
   console.log("====================");
 }
 

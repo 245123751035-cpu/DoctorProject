@@ -58,10 +58,23 @@ export interface ConsultationRow {
   investigations: string | null;
   doctorObservations: string | null;
   assessment: string | null;
+  diagnosis: string | null;
+  prescription: string | null;
   followUpNotes: string | null;
 }
 
-type TabKey = "overview" | "history" | "consultations" | "medications" | "allergies" | "investigations" | "ai";
+type TabKey = "overview" | "history" | "consultations" | "medications" | "allergies" | "investigations" | "reports" | "ai";
+
+export interface PatientReportRow {
+  id: string;
+  createdAt: string;
+  symptoms: string | null;
+  complaint: string | null;
+  medicalHistory: string | null;
+  currentCondition: string | null;
+  duration: string | null;
+  additionalNotes: string | null;
+}
 
 export function ProfileTabs({
   patient,
@@ -69,7 +82,8 @@ export function ProfileTabs({
   medications,
   allergies,
   investigations,
-  conditions
+  conditions,
+  patientReports = []
 }: {
   patient: PatientProfileData;
   consultations: ConsultationRow[];
@@ -77,6 +91,7 @@ export function ProfileTabs({
   allergies: Allg[];
   investigations: Invest[];
   conditions: Cond[];
+  patientReports?: PatientReportRow[];
 }) {
   const [tab, setTab] = useState<TabKey>("overview");
   const { t } = useLocale();
@@ -85,6 +100,7 @@ export function ProfileTabs({
     { key: "overview", label: t("patient.profile.overview") },
     { key: "history", label: t("patient.profile.medicalHistory") },
     { key: "consultations", label: t("patient.profile.consultations") },
+    { key: "reports", label: t("patient.profile.patientReports") },
     { key: "medications", label: t("patient.profile.medications") },
     { key: "allergies", label: t("patient.profile.allergies") },
     { key: "investigations", label: t("patient.profile.investigations") },
@@ -131,6 +147,7 @@ export function ProfileTabs({
         />
       )}
       {tab === "consultations" && <ConsultationsTab consultations={consultations} t={t} />}
+      {tab === "reports" && <PatientReportsTab reports={patientReports} t={t} />}
       {tab === "medications" && <Medications medications={medications} t={t} />}
       {tab === "allergies" && <AllergiesTab allergies={allergies} t={t} />}
       {tab === "investigations" && <InvestigationsTab investigations={investigations} t={t} />}
@@ -346,6 +363,55 @@ function InvestigationsTab({ investigations, t }: { investigations: Invest[]; t:
         </li>
       ))}
     </ul>
+  );
+}
+
+function PatientReportsTab({ reports, t }: { reports: PatientReportRow[]; t: (k: string) => string }) {
+  if (reports.length === 0)
+    return <Empty message={t("patient.profile.noReports")} />;
+  return (
+    <div className="space-y-3">
+      {reports.map((r) => (
+        <div key={r.id} className="card card-body">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground">{formatDate(r.createdAt)}</span>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Patient Report</span>
+          </div>
+          <div className="space-y-2 text-sm">
+            {r.complaint && (
+              <div>
+                <div className="font-medium text-muted-foreground">Complaint</div>
+                <p className="whitespace-pre-wrap">{r.complaint}</p>
+              </div>
+            )}
+            {r.symptoms && (
+              <div>
+                <div className="font-medium text-muted-foreground">Symptoms</div>
+                <p className="whitespace-pre-wrap">{r.symptoms}</p>
+              </div>
+            )}
+            {r.medicalHistory && (
+              <div>
+                <div className="font-medium text-muted-foreground">Medical History</div>
+                <p className="whitespace-pre-wrap">{r.medicalHistory}</p>
+              </div>
+            )}
+            {r.currentCondition && (
+              <div>
+                <div className="font-medium text-muted-foreground">Current Condition</div>
+                <p className="whitespace-pre-wrap">{r.currentCondition}</p>
+              </div>
+            )}
+            {r.additionalNotes && (
+              <div>
+                <div className="font-medium text-muted-foreground">Additional Notes</div>
+                <p className="whitespace-pre-wrap">{r.additionalNotes}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

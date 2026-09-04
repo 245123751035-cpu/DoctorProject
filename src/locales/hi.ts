@@ -7,7 +7,9 @@ const hi: Record<string, unknown> = {
   nav: {
     dashboard: "डैशबोर्ड",
     registerPatient: "रोगी पंजीकृत करें",
-    logout: "लॉगआउट"
+    logout: "लॉगआउट",
+    myRecords: "मेरे रिकॉर्ड",
+    reportSymptoms: "लक्षण रिपोर्ट करें"
   },
   auth: {
     login: {
@@ -21,7 +23,9 @@ const hi: Record<string, unknown> = {
       noAccount: "खाता नहीं है?",
       registerLink: "डॉक्टर के रूप में पंजीकरण करें",
       error: "गलत ईमेल या पासवर्ड।",
-      genericError: "कुछ गड़बड़ हो गई। कृपया पुनः प्रयास करें।"
+      genericError: "कुछ गड़बड़ हो गई। कृपया पुनः प्रयास करें।",
+      asDoctor: "डॉक्टर लॉगिन",
+      asPatient: "रोगी लॉगिन"
     },
     register: {
       title: "डॉक्टर पंजीकरण",
@@ -40,6 +44,28 @@ const hi: Record<string, unknown> = {
       hasAccount: "पहले से खाता है?",
       loginLink: "लॉगिन",
       error: "पंजीकरण विफल रहा। यह ईमेल पहले से पंजीकृत हो सकता है।"
+    },
+    patient: {
+      login: {
+        title: "रोगी लॉगिन",
+        subtitle: "अपने मेडिकल रिकॉर्ड देखने के लिए साइन इन करें",
+        submit: "लॉगिन",
+        noAccount: "खाता नहीं है?",
+        registerLink: "रोगी के रूप में पंजीकरण करें",
+        doctorLogin: "डॉक्टर? यहाँ लॉगिन करें",
+        error: "गलत ईमेल या पासवर्ड।"
+      },
+      register: {
+        title: "रोगी पंजीकरण",
+        subtitle: "अपने मेडिकल रिकॉर्ड तक पहुँचने के लिए खाता बनाएं",
+        patientCode: "रोगी कोड",
+        patientCodeHint: "अपने डॉक्टर से अपना रोगी कोड पूछें (जैसे MX-6660)",
+        submit: "खाता बनाएं",
+        hasAccount: "पहले से खाता है?",
+        loginLink: "लॉगिन",
+        success: "खाता सफलतापूर्वक बनाया गया!",
+        error: "पंजीकरण विफल रहा। कृपया अपने विवरण जांचें।"
+      }
     }
   },
   dashboard: {
@@ -133,7 +159,9 @@ const hi: Record<string, unknown> = {
       noMedications: "कोई दवाई दर्ज नहीं है।",
       noAllergies: "कोई एलर्जी दर्ज नहीं है।",
       noInvestigations: "कोई जांच दर्ज नहीं है।",
-      notAvailable: "उपलब्ध नहीं"
+      notAvailable: "उपलब्ध नहीं",
+      patientReports: "रोगी रिपोर्ट",
+      noReports: "अभी कोई रिपोर्ट नहीं।"
     },
     timeline: {
       title: "चिकित्सा इतिहास समयरेखा",
@@ -169,7 +197,58 @@ const hi: Record<string, unknown> = {
       disclaimer: "समीक्षा के लिए AI-जनित सारांश। यह पेशेवर चिकित्सा निर्णय का स्थान नहीं लेता।",
       error: "अभी AI सारांश बनाने में असमर्थ। रोगी का संग्रहीत इतिहास अभी भी उपलब्ध है।",
       recent: "हाल"
+    },
+    symptoms: {
+      yourComplaint: "आपकी शिकायत",
+      complaint: "आज आप किस बारे में आए हैं?",
+      complaintPlaceholder: "अपनी मुख्य चिंता बताएं",
+      symptoms: "आपके लक्षण",
+      symptomsPlaceholder: "अपने लक्षण बताएं",
+      duration: "कितने समय से?",
+      durationPlaceholder: "जैसे 3 दिन",
+      currentCondition: "वर्तमान स्थिति",
+      currentConditionPlaceholder: "बिगड़ रहा है, सुधर रहा है",
+      yourHistory: "आपका चिकित्सा इतिहास",
+      medicalHistory: "चिकित्सा इतिहास",
+      medicalHistoryPlaceholder: "पिछली बीमारियाँ बताएं",
+      additionalNotes: "अतिरिक्त नोट्स",
+      additionalNotesPlaceholder: "कोई अन्य जानकारी",
+      submit: "रिपोर्ट सहेजें",
+      success: "रिपोर्ट सहेजी गई।",
+      error: "रिपोर्ट सहेजने में विफल।"
     }
+  },
+  patientDashboard: {
+    welcome: "स्वागत है",
+    subtitle: "अपनी मेडिकल जानकारी देखें और लक्षण रिपोर्ट करें",
+    myProfile: "मेरी प्रोफ़ाइल",
+    summary: "सारांश",
+    visits: "मुलाकातें",
+    myReports: "मेरी रिपोर्ट",
+    medications: "दवाइयाँ",
+    doctor: "डॉक्टर",
+    clinic: "क्लिनिक",
+    reportSymptoms: "लक्षण रिपोर्ट करें",
+    reportSymptomsHint: "अपने डॉक्टर को अपने वर्तमान लक्षण बताएं",
+    viewRecords: "मेरे रिकॉर्ड",
+    viewRecordsHint: "अपना मेडिकल इतिहास और डॉक्टर नोट्स देखें",
+    recentVisits: "हाल की मुलाकातें",
+    noRecords: "अभी कोई रिकॉर्ड नहीं। आपकी मेडिकल जानकारी यहाँ दिखाई देगी।",
+    noConditions: "कोई स्थिति दर्ज नहीं",
+    doctorRecords: "डॉक्टर रिकॉर्ड",
+    yourReport: "आपकी रिपोर्ट",
+    complaint: "शिकायत",
+    symptoms: "लक्षण",
+    medicalHistory: "चिकित्सा इतिहास",
+    currentCondition: "वर्तमान स्थिति",
+    additionalNotes: "अतिरिक्त नोट्स",
+    doctorInformation: "डॉक्टर जानकारी",
+    observations: "डॉक्टर टिप्पणियाँ",
+    assessment: "आकलन",
+    diagnosis: "निदान",
+    prescription: "पर्चा",
+    followUp: "फॉलो-अप नोट्स",
+    chiefComplaint: "मुख्य शिकायत"
   },
   consultation: {
     new: {
@@ -203,6 +282,10 @@ const hi: Record<string, unknown> = {
       doctorObservationsPlaceholder: "जांच पर नैदानिक निष्कर्ष",
       assessment: "डॉक्टर का आकलन",
       assessmentPlaceholder: "इस केस का आपका आकलन",
+      diagnosis: "निदान",
+      diagnosisPlaceholder: "आपका निदान",
+      prescription: "पर्चा",
+      prescriptionPlaceholder: "निर्धारित दवाइयाँ और निर्देश",
       followUpNotes: "फॉलो-अप नोट्स",
       followUpNotesPlaceholder: "योजना और फॉलो-अप निर्देश",
       submit: "परामर्श सहेजें",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { loginSchema } from "@/lib/validation/schemas";
 import { verifyPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
-import { createDoctorSession, SESSION_COOKIE } from "@/lib/auth/session";
+import { createPatientSession, SESSION_COOKIE } from "@/lib/auth/session";
 import { writeAuditLog } from "@/services/audit";
 
 const MAX_ATTEMPTS = 8;
@@ -42,24 +42,24 @@ export async function POST(request: Request) {
 
     const { email, password } = parsed.data;
 
-    const doctor = await db.doctor.findUnique({ where: { email: email.toLowerCase() } });
+    const patientUser = await db.patientUser.findUnique({ where: { email: email.toLowerCase() } });
 
     const genericError = { error: "Incorrect email or password." };
-    if (!doctor) {
+    if (!patientUser) {
       return NextResponse.json(genericError, { status: 401 });
     }
 
-    const valid = await verifyPassword(password, doctor.passwordHash);
+    const valid = await verifyPassword(password, patientUser.passwordHash);
     if (!valid) {
       return NextResponse.json(genericError, { status: 401 });
     }
 
-    const sessionCookie = await createDoctorSession(doctor.id);
+    const sessionCookie = await createPatientSession(patientUser.id);
 
-    writeAuditLog({ doctorId: doctor.id, action: "doctor.login", ip });
+    writeAuditLog({ action: "patient.login", details: patientUser.email, ip });
 
     const response = NextResponse.json(
-      { ok: true, doctor: { id: doctor.id, name: doctor.name, email: doctor.email } },
+      { ok: true, patient: { id: patientUser.id, name: patientUser.name, email: patientUser.email } },
       { status: 200 }
     );
 
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Patient login error:", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 }

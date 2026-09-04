@@ -2,7 +2,7 @@ import { createHash, randomBytes, createHmac } from "crypto";
 import { db } from "@/lib/db";
 
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "";
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export const SESSION_COOKIE = "dp_session";
 
 function generateToken(): string {
@@ -26,7 +26,6 @@ function verifyCookieValue(cookie: string | undefined): string | null {
   if (parts.length !== 2) return null;
   const [payload, sig] = parts;
   const expected = sign(payload);
-  // Constant-time comparison
   if (sig.length !== expected.length) return null;
   let diff = 0;
   for (let i = 0; i < sig.length; i++) {
@@ -36,10 +35,7 @@ function verifyCookieValue(cookie: string | undefined): string | null {
   return payload;
 }
 
-/**
- * Creates a new session for a doctor and returns the signed cookie value.
- */
-export async function createSession(doctorId: string): Promise<string> {
+export async function createDoctorSession(doctorId: string): Promise<string> {
   const token = generateToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await db.session.create({
@@ -48,10 +44,15 @@ export async function createSession(doctorId: string): Promise<string> {
   return createCookieValue(token);
 }
 
-/**
- * Resolves the current doctor from a raw cookie header value.
- * Returns null when the session is invalid/expired.
- */
+export async function createPatientSession(patientUserId: string): Promise<string> {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  await db.session.create({
+    data: { token, patientUserId, expiresAt }
+  });
+  return createCookieValue(token);
+}
+
 export async function getDoctorFromCookie(cookieHeader?: string | null) {
   if (!cookieHeader) return null;
   const token = verifyCookieValue(cookieHeader);
@@ -70,6 +71,26 @@ export async function getDoctorFromCookie(cookieHeader?: string | null) {
   }
 
   return session.doctor;
+}
+
+export async function getPatientUserFromCookie(cookieHeader?: string | null) {
+  if (!cookieHeader) return null;
+  const token = verifyCookieValue(cookieHeader);
+  if (!token) return null;
+
+  const session = await db.session.findUnique({
+    where: { token },
+    include: { patientUser: { include: { patient: true } } }
+  });
+
+  if (!session || session.expiresAt < new Date()) {
+    if (session) {
+      await db.session.delete({ where: { id: session.id } }).catch(() => {});
+    }
+    return null;
+  }
+
+  return session.patientUser;
 }
 
 export async function destroySession(cookieHeader?: string | null): Promise<void> {
