@@ -15,6 +15,14 @@ export class MockAIService implements AIService {
     await delay(600);
     return buildFactualSummary(input);
   }
+
+  /**
+   * MockAIService has no external capabilities: agents must always rely on
+   * their deterministic extraction when running offline.
+   */
+  async complete(): Promise<string | null> {
+    return null;
+  }
 }
 
 export function delay(ms: number): Promise<void> {

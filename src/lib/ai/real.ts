@@ -1,4 +1,4 @@
-import type { AIService, HistorySummary, PatientHistoryInput } from "./types";
+import type { AIService, AICompletionOptions, HistorySummary, PatientHistoryInput } from "./types";
 import { buildFactualSummary } from "./factual";
 import { AIError } from "./types";
 
@@ -73,6 +73,43 @@ export class RealAIService implements AIService {
         throw error;
       }
       throw new AIError("AI request failed. Falling back to offline summary.");
+    }
+  }
+
+  async complete(
+    system: string,
+    user: string,
+    options: AICompletionOptions = {}
+  ): Promise<string | null> {
+    if (!this.apiKey) return null;
+
+    const payload: Record<string, unknown> = {
+      model: this.model,
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user }
+      ]
+    };
+    if (options.json) payload.response_format = { type: "json_object" };
+
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      return typeof content === "string" && content.trim().length > 0 ? content.trim() : null;
+    } catch {
+      return null;
     }
   }
 

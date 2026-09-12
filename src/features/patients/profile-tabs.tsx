@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/components/ui/toast";
 import { AISummary } from "./ai-summary";
+import { MultiAgentAnalysisPanel } from "./multi-agent-analysis";
 
 export interface PatientProfileData {
   id: string;
@@ -158,7 +159,14 @@ export function ProfileTabs({
       {tab === "medications" && <Medications medications={medications} t={t} />}
       {tab === "allergies" && <AllergiesTab allergies={allergies} t={t} />}
       {tab === "investigations" && <InvestigationsTab investigations={investigations} t={t} />}
-      {tab === "ai" && <AISummary patientId={patient.id} />}
+      {tab === "ai" && (
+        <div className="space-y-8">
+          <AISummary patientId={patient.id} />
+          <div className="border-t border-border pt-8">
+            <MultiAgentAnalysisPanel patientId={patient.id} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -56,11 +56,27 @@ export interface HistorySummary {
   disclaimer: string;
 }
 
+export interface AICompletionOptions {
+  json?: boolean;
+}
+
 export interface AIService {
   generatePatientHistorySummary(
     input: PatientHistoryInput,
     language?: string
   ): Promise<HistorySummary>;
+
+  /**
+   * Sends an arbitrary prompt to the configured AI provider and returns the
+   * raw response text, or `null` when no provider is configured / available
+   * (offline mode). Agents use this only to enrich their deterministic,
+   * offline results — they must never crash when it returns `null`.
+   */
+  complete(
+    system: string,
+    user: string,
+    options?: AICompletionOptions
+  ): Promise<string | null>;
 }
 
 export class AIError extends Error {

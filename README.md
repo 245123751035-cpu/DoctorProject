@@ -21,6 +21,9 @@ A doctor:
 5. Views a **chronological medical timeline** of everything that happened before.
 6. Generates an **AI-assisted Clinical History Summary** so the doctor can grasp
    the prior history instantly.
+7. Runs a **Multi-Agent Case Analysis** — a coordinator orchestrates dedicated
+   *Symptom*, *History*, *Language* and *Report* agents to produce a structured
+   clinical report for the current visit.
 
 The AI **never** makes the final decision, never invents data, and clearly labels
 its output as a summary for clinician review — with a fallback that works offline.
@@ -49,6 +52,7 @@ src/
       patients/         create, search
       consultations/    create
       ai/summary        generate AI history summary
+      ai/multi-agent    run multi-agent case analysis (POST)
     (login, register, dashboard, patients/...)
   components/
     ui/                 presentational primitives (toast)
@@ -64,6 +68,7 @@ src/
     db.ts               Prisma client singleton
     auth/               sessions, password hashing, current-user
     ai/                 AIService interface + mock/real providers
+    agents/             coordinator + symptom/history/language/report agents
     validation/         Zod schemas
     i18n-server.ts      server-side translation helper
     patient-code.ts     code generator
@@ -131,17 +136,22 @@ Entities (all relational, no giant JSON blobs):
 ```
 interface AIService {
   generatePatientHistorySummary(input, language): Promise<HistorySummary>
+  complete(system, user, options?): Promise<string | null>  // { json?: boolean }
 }
 ```
 
 Two implementations selected by `AI_PROVIDER`:
 
 - **MockAIService** — fully offline, deterministic. Builds a structured
-  "Clinical History Summary" **strictly from stored records**. Works with no API
-  key, so the demo never breaks.
+  "Clinical History Summary" **strictly from stored records**. `complete()`
+  returns `null`, so downstream agents always take the offline path. Works with
+  no API key, so the demo never breaks.
 - **RealAIService** — calls an OpenAI-compatible chat completions endpoint using
   `AI_API_KEY` / `AI_MODEL` / `AI_BASE_URL`. Output is validated, and on any
   failure it **falls back to the offline summary** instead of crashing.
+  `complete()` requests plain chat output (or `response_format: json` when
+  `{ json: true }`) and returns `null` on any failure so agents degrade
+  gracefully. `isAIConfigured()` reports whether a real provider is available.
 
 Both produce the same structure:
 
@@ -165,7 +175,46 @@ Every output includes the disclaimer:
 The AI uses **only** the data in the patient's stored records and reports
 "Not available in the recorded history." when something is missing.
 
-## 8. Multilingual architecture
+## 8. Multi-Agent Case Analysis
+
+A **coordinator agent** (`src/lib/agents/coordinator-agent.ts`) orchestrates
+specialized agents per consultation, exposed via `POST /api/ai/multi-agent`
+(`{ patientId, consultationId?, language? }`) and the **"Multi-Agent Case
+Analysis"** panel on the patient profile AI tab.
+
+```
+Coordinator ── symptom agent ── extracts chief complaint, symptoms,
+              │                 duration, severity
+              ├─ history  agent ── recurring symptoms, prior diagnoses,
+              │                    medications, allergies
+              ├─ language agent ── detects consultation language,
+              │                    preserves original text
+              └─ report   agent ── merges the above into a structured
+                                   clinical report + items for doctor review
+```
+
+- The **Symptom** agent prefers live AI extraction and falls back to the
+  consultation's structured fields (chief complaint / symptoms / duration /
+  severity).
+- The **History** and **Language** agents reuse the existing `AIService`
+  (`generatePatientHistorySummary` / `complete`); their deterministic offline
+  outputs are built strictly from stored records.
+- The **Report** agent composes `chiefComplaint`, `currentSymptoms`,
+  `durationAndSeverity`, `relevantMedicalHistory`, `previousConditions`,
+  `medications`, `allergies`, `importantObservations` and
+  `itemsForDoctorReview`, using `NOT_AVAILABLE_COPY` placeholders instead of
+  invented text.
+- Every run ends with the exact safety line:
+
+> "AI-generated information for clinician review. It does not replace
+> professional medical judgment."
+
+The frontend shows one status row per agent (✓ done) plus the final report; a
+**fallback badge** appears whenever the run degraded to offline mode. Each run
+is written to the audit log (`ai.multiAgent.generated`). The result is displayed
+only — it is **not persisted** and never overrides the doctor's own records.
+
+## 9. Multilingual architecture
 
 - UI dictionaries live in `src/locales/{en,hi,te}.ts`. A translation resolver
   (`translate(lang, key)`) falls back to English for any missing key.
@@ -176,7 +225,7 @@ The AI uses **only** the data in the patient's stored records and reports
   replaced.
 - The AI summary can be produced in the selected output language.
 
-## 9. How to install
+## 10. How to install
 
 Prerequisites: **Node 18+**, **npm**, and **PostgreSQL** (or Docker).
 
@@ -186,7 +235,7 @@ cd DoctorProject
 npm install
 ```
 
-## 10. Environment variables
+## 11. Environment variables
 
 Copy `.env.example` to `.env` and set values:
 
@@ -205,7 +254,7 @@ cp .env.example .env
 
 `.env` is git-ignored and **never committed**.
 
-## 11. Database setup
+## 12. Database setup
 
 Using **Docker** (recommended):
 
@@ -227,7 +276,7 @@ npx prisma db push
 
 (For first-time setup you can also use `npx prisma migrate dev --name init`.)
 
-## 12. Seed demo data
+## 13. Seed demo data
 
 ```bash
 npx tsx prisma/seed.ts
@@ -242,14 +291,14 @@ This creates:
 
 All seed data is **synthetic / fictional** — no real patient information.
 
-## 13. Run the development server
+## 14. Run the development server
 
 ```bash
 npm run dev
 # open http://localhost:3000
 ```
 
-## 14. Build for production
+## 15. Build for production
 
 ```bash
 npm run build
@@ -264,7 +313,7 @@ npm run lint        # ESLint
 npm test            # Vitest (unit + integration)
 ```
 
-## 15. Demo credentials
+## 16. Demo credentials
 
 **Doctor account**
 
@@ -276,25 +325,28 @@ Password: Doctor@123
 Seeded patient codes (for search): `MX-4291` (Ravi Kumar), `PC-4034` (Ananya
 Verma), `MX-7288` (Mohammed Irfan). *Your generated codes may differ.*
 
-## 16. Hackathon demo flow (for a judge)
+## 17. Hackathon demo flow (for a judge)
 
 1. Open `http://localhost:3000` → **Login** with the demo account above.
 2. Dashboard shows stats and recent patients. Type a patient code (e.g.
    `MX-4291`) into **Find Patient**.
 3. Click **Open** to open the patient **profile** with tabs and last-visit info.
 4. Click **AI History Summary** → **Generate** to get the instant summary.
-5. Click **Back to Dashboard** → **Register Patient** → fill the form →
+5. Click **Multi-Agent Case Analysis** → **Run Analysis** to watch the agent
+   pipeline (Symptom → History → Language → Report) complete and show the final
+   structured clinical report with the safety disclaimer.
+6. Click **Back to Dashboard** → **Register Patient** → fill the form →
    a **unique patient code** is generated with a copy button.
-6. Click **Open Patient Profile** → **New Consultation**.
-7. Enter a case; switch the **language selector** (English / हिन्दी / తెలుగు)
+7. Click **Open Patient Profile** → **New Consultation**.
+8. Enter a case; switch the **language selector** (English / हिन्दी / తెలుగు)
    and type a chief complaint in Hindi or Telugu. Optionally use **voice input**.
-8. **Save Consultation** → it appears in the chronological timeline.
-9. Return to dashboard, search the new patient's code, confirm the history and
-   regenerate the AI summary.
+9. **Save Consultation** → it appears in the chronological timeline.
+10. Return to dashboard, search the new patient's code, confirm the history and
+    regenerate the AI summary.
 
 The entire workflow takes under 3 minutes.
 
-## 17. Limitations (MVP)
+## 18. Limitations (MVP)
 
 - The real AI provider is optional; the offline mock summary is the default.
 - Voice input depends on browser `SpeechRecognition` support and is optional.
@@ -303,7 +355,7 @@ The entire workflow takes under 3 minutes.
 - No multi-doctor clinic sharing / admin functionality (out of MVP scope).
 - Demo data is fictional; set up for a single demo doctor by default.
 
-## 18. Privacy & security considerations
+## 19. Privacy & security considerations
 
 - **Sensitive medical data**: this is a demo. Treat it as such — never load real
   patient records.
